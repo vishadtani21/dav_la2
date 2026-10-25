@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AcademiaIQ | Student Academic Performance & Early Intervention Platform</title>
+  <meta name="description" content="Production-grade academic analytics platform for educators, mentors, and administrators. Real-time predictive modeling, early warning triage, and student roster management.">
+
+  <!-- Typography: Space Grotesk & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Embedded Dataset Base (320 Verified Records) -->
+  <script src="students_data.js"></script>
+
+  <!-- Production Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="container nav-wrapper">
+      <a href="#" class="brand">
+        <div class="brand-symbol">
+          <i class="fa-solid fa-compass-drafting"></i>
+        </div>
+        <div>
+          <span class="brand-text">AcademiaIQ</span>
+          <span class="brand-tag">Enterprise</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu">
+        <li><a href="#overview" class="active">Overview</a></li>
+        <li><a href="#at-risk">Early Warning</a></li>
+        <li><a href="#simulator">Scenario Simulator</a></li>
+        <li><a href="#roster">Student Roster</a></li>
+        <li><a href="#analytics">Analytics</a></li>
+        <li><a href="#exports">Export & Reports</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn-secondary" onclick="openImportModal()">
+          <i class="fa-solid fa-file-arrow-up"></i> Import CSV
+        </button>
+        <button class="btn-primary" onclick="openAddStudentModal()">
+          <i class="fa-solid fa-user-plus"></i> Add Student
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="container">
+    <!-- Header Summary & Status -->
+    <header class="app-header" id="overview">
+      <div class="header-meta">
+        <div>
+          <h1 class="page-title">Academic Performance & Early Intervention Dashboard</h1>
+          <p class="page-subtitle">Continuous student tracking, predictive risk stratification, and data-backed academic advising.</p>
+        </div>
+        <div class="system-status-badge">
+          <span class="pulse-dot"></span>
+          <span>Scikit-Learn Regression Engine Active (R²: 81.83%)</span>
+        </div>
+      </div>
+
+      <!-- KPI Summary Row -->
+      <div class="kpi-row">
+        <div class="kpi-card blue">
+          <div class="kpi-top">
+            <span class="kpi-title">Active Roster</span>
+            <div class="kpi-icon-box"><i class="fa-solid fa-users"></i></div>
+          </div>
+          <div class="kpi-number" id="metric-total-students">320</div>
+          <div class="kpi-meta">Enrolled in current term</div>
+        </div>
+
+        <div class="kpi-card green">
+          <div class="kpi-top">
+            <span class="kpi-title">Cohort Mean Score</span>
+            <div class="kpi-icon-box"><i class="fa-solid fa-chart-line"></i></div>
+          </div>
+          <div class="kpi-number" id="metric-avg-marks">69.59</div>
+          <div class="kpi-meta">Benchmark out of 100</div>
+        </div>
+
+        <div class="kpi-card amber">
+          <div class="kpi-top">
+            <span class="kpi-title">Average Attendance</span>
+            <div class="kpi-icon-box"><i class="fa-solid fa-calendar-check"></i></div>
+          </div>
+          <div class="kpi-number" id="metric-avg-attendance">75.75%</div>
+          <div class="kpi-meta">Lecture presence rate</div>
+        </div>
+
+        <div class="kpi-card red">
+          <div class="kpi-top">
+            <span class="kpi-title">Flagged At-Risk</span>
+            <div class="kpi-icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          </div>
+          <div class="kpi-number" id="metric-at-risk-count">9</div>
+          <div class="kpi-meta">Predicted &lt; 50 or Attendance &lt; 65%</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Operational Dashboard Grid (Early Warning & Simulator) -->
+    <section class="dashboard-grid">
+      <!-- Left: Early Warning At-Risk Triage Panel -->
+      <div class="content-box" id="at-risk">
+        <div class="box-header">
+          <div class="box-title-group">
+            <h3>Early Warning & Intervention Triage</h3>
+            <p>Students flagged for immediate mentoring, low attendance, or projected exam failure.</p>
+          </div>
+          <span class="risk-tag" id="triage-status-tag">Priority Attention</span>
+        </div>
+
+        <div class="at-risk-feed" id="at-risk-feed-container">
+          <!-- Populated dynamically via app.js -->
+        </div>
+      </div>
+
+      <!-- Right: What-If Academic Scenario Simulator -->
+      <div class="content-box" id="simulator">
+        <div class="box-header">
+          <div class="box-title-group">
+            <h3>What-If Grade Simulator</h3>
+            <p>Simulate projected outcomes based on study habits and internal scores.</p>
+          </div>
+          <button class="icon-btn" onclick="resetSimulator()" title="Reset to defaults">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+          </button>
+        </div>
+
+        <div class="simulator-card">
+          <!-- Sliders -->
+          <div class="slider-unit">
+            <div class="slider-label-row">
+              <span>Attendance Rate</span>
+              <span class="slider-val" id="sim-val-att">85%</span>
+            </div>
+            <input type="range" class="slider-input" id="sim-slider-att" min="40" max="100" step="1" value="85">
+          </div>
+
+          <div class="slider-unit">
+            <div class="slider-label-row">
+              <span>Daily Study Hours</span>
+              <span class="slider-val" id="sim-val-study">5.0 hrs</span>
+            </div>
+            <input type="range" class="slider-input" id="sim-slider-study" min="0.5" max="12" step="0.5" value="5.0">
+          </div>
+
+          <div class="slider-unit">
+            <div class="slider-label-row">
+              <span>Assignment Performance</span>
+              <span class="slider-val" id="sim-val-assign">88</span>
+            </div>
+            <input type="range" class="slider-input" id="sim-slider-assign" min="30" max="100" step="1" value="88">
+          </div>
+
+          <div class="slider-unit">
+            <div class="slider-label-row">
+              <span>Internal Assessment</span>
+              <span class="slider-val" id="sim-val-int">82</span>
+            </div>
+            <input type="range" class="slider-input" id="sim-slider-int" min="30" max="100" step="1" value="82">
+          </div>
+
+          <div class="slider-unit">
+            <div class="slider-label-row">
+              <span>Previous Semester Baseline</span>
+              <span class="slider-val" id="sim-val-prev">78</span>
+            </div>
+            <input type="range" class="slider-input" id="sim-slider-prev" min="40" max="100" step="1" value="78">
+          </div>
+
+          <!-- Output Display -->
+          <div class="sim-output-box">
+            <div class="sim-score-ring">
+              <svg viewBox="0 0 110 110" style="transform: rotate(-90deg); width: 110px; height: 110px;">
+                <circle cx="55" cy="55" r="45" fill="none" stroke="#19273f" stroke-width="8"></circle>
+                <circle id="sim-svg-ring" cx="55" cy="55" r="45" fill="none" stroke="#4f46e5" stroke-width="8" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="50"></circle>
+              </svg>
+              <div class="sim-score-text" id="sim-display-score">82.3</div>
+            </div>
+
+            <div class="sim-tier-badge good" id="sim-display-badge">Good (70-84.99)</div>
+            <p class="sim-advice" id="sim-display-advice">Consistent study habits and strong assignments position this student for honors.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Student Roster Management Table -->
+    <section class="roster-section" id="roster">
+      <div class="roster-toolbar">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="search-input" id="roster-search" placeholder="Search by Student ID (e.g. STU1024)...">
+        </div>
+
+        <div class="filter-group">
+          <select class="select-ctrl" id="filter-tier">
+            <option value="ALL">All Performance Tiers</option>
+            <option value="Excellent (85-100)">Excellent (85-100)</option>
+            <option value="Good (70-84.99)">Good (70-84.99)</option>
+            <option value="Average (50-69.99)">Average (50-69.99)</option>
+            <option value="Needs Improvement (<50)">Needs Improvement (&lt;50)</option>
+          </select>
+
+          <select class="select-ctrl" id="filter-gender">
+            <option value="ALL">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+
+          <button class="btn-secondary" onclick="exportCurrentRosterToCSV()">
+            <i class="fa-solid fa-file-csv"></i> Export Roster CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrapper">
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Student ID</th>
+                <th>Gender</th>
+                <th>Attendance</th>
+                <th>Daily Study</th>
+                <th>Assignment</th>
+                <th>Internal Marks</th>
+                <th>Prev Sem</th>
+                <th>Final Marks</th>
+                <th>Standing</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="roster-table-body">
+              <!-- Dynamically rendered via app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-pagination">
+          <span id="pagination-info">Showing 1-10 of 320 records</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-secondary" id="btn-page-prev"><i class="fa-solid fa-chevron-left"></i></button>
+            <span id="page-num-display" style="padding: 6px 12px; font-weight: 600;">Page 1</span>
+            <button class="btn-secondary" id="btn-page-next"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visual Analytics Hub -->
+    <section class="analytics-section" id="analytics">
+      <div class="content-box">
+        <div class="box-header">
+          <div class="box-title-group">
+            <h3 id="active-analytics-title">Cohort Distribution & Performance Analytics</h3>
+            <p id="active-analytics-desc">Empirical insights derived from continuous academic evaluations.</p>
+          </div>
+
+          <div class="chart-tab-list">
+            <button class="chart-tab active" data-chart="distribution">Final Marks Spread</button>
+            <button class="chart-tab" data-chart="tiers">Tier Breakdown</button>
+            <button class="chart-tab" data-chart="study-impact">Study Hours Correlation</button>
+            <button class="chart-tab" data-chart="attendance-impact">Attendance Impact</button>
+            <button class="chart-tab" data-chart="actual-pred">Model Diagnostics (R² = 81.8%)</button>
+          </div>
+        </div>
+
+        <div class="chart-canvas-box">
+          <canvas id="analytics-canvas"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Export & Reporting Hub -->
+    <section class="content-box" id="exports" style="margin-bottom: 60px;">
+      <div class="box-header">
+        <div class="box-title-group">
+          <h3>Institution Reports & Data Downloads</h3>
+          <p>Export executive spreadsheets, raw datasets, and complete statistical workbooks.</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px;">
+        <div style="background: rgba(14,22,38,0.7); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 20px;">
+          <h4 style="color: #fff; margin-bottom: 6px;"><i class="fa-solid fa-file-excel" style="color: var(--emerald);"></i> Excel Master Workbook</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">7 formatted sheets (Raw, Cleaned, Stats, Correlation, Categories, Model, Predictions) with active <code>=AVERAGE()</code> formulas.</p>
+          <a href="Student_Academic_Performance_Analysis.xlsx" download class="btn-secondary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-download"></i> Download .xlsx
+          </a>
+        </div>
+
+        <div style="background: rgba(14,22,38,0.7); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 20px;">
+          <h4 style="color: #fff; margin-bottom: 6px;"><i class="fa-solid fa-file-csv" style="color: var(--cyan);"></i> Cleaned Roster CSV</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">Sanitized dataset with zero missing values, outlier-screened and ready for ERP or database ingestion.</p>
+          <a href="cleaned_student_data.csv" download class="btn-secondary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-download"></i> Download .csv
+          </a>
+        </div>
+
+        <div style="background: rgba(14,22,38,0.7); border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 20px;">
+          <h4 style="color: #fff; margin-bottom: 6px;"><i class="fa-solid fa-file-code" style="color: var(--amber);"></i> Python Analysis Notebook</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">Jupyter / Google Colab pipeline file with complete data wrangling and Scikit-learn Linear Regression.</p>
+          <a href="Student_Academic_Performance_Analysis.ipynb" download class="btn-secondary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-download"></i> Download .ipynb
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Add New Student -->
+  <div class="modal-overlay" id="modal-add-student">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-student-title">Enroll / Add Student Record</h3>
+        <button class="close-btn" onclick="closeAddStudentModal()">&times;</button>
+      </div>
+      <form id="form-student" onsubmit="handleSaveStudent(event)">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Student ID</label>
+              <input type="text" class="form-input" id="inp-student-id" required placeholder="e.g. STU1321">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select class="form-input" id="inp-gender" required>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Attendance Rate (%)</label>
+              <input type="number" class="form-input" id="inp-attendance" min="0" max="100" step="0.1" required placeholder="0 - 100">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Daily Study Hours</label>
+              <input type="number" class="form-input" id="inp-study" min="0" max="16" step="0.1" required placeholder="0 - 16">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Assignment Score (0-100)</label>
+              <input type="number" class="form-input" id="inp-assignment" min="0" max="100" step="0.1" required placeholder="0 - 100">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Internal Marks (0-100)</label>
+              <input type="number" class="form-input" id="inp-internal" min="0" max="100" step="0.1" required placeholder="0 - 100">
+            </div>
+
+            <div class="form-group full">
+              <label class="form-label">Previous Semester Marks (0-100)</label>
+              <input type="number" class="form-input" id="inp-prev" min="0" max="100" step="0.1" required placeholder="0 - 100">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeAddStudentModal()">Cancel</button>
+          <button type="submit" class="btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save & Score Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Batch CSV Import -->
+  <div class="modal-overlay" id="modal-import">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Batch CSV Student Ingestion</h3>
+        <button class="close-btn" onclick="closeImportModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+          Select a CSV file containing student records or paste raw CSV text. The ML regression model will automatically evaluate every record in real time.
+        </p>
+
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label">Upload File (.csv)</label>
+          <input type="file" id="file-csv-input" accept=".csv" class="form-input" onchange="handleCSVFile(event)">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Or Paste CSV Data Directly</label>
+          <textarea id="text-csv-input" rows="5" class="form-input" placeholder="Student_ID,Gender,Attendance_Percentage,Study_Hours,Assignment_Score,Internal_Marks,Previous_Semester_Marks&#10;STU1501,Male,84.0,5.2,86.0,80.0,76.0"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeImportModal()">Cancel</button>
+        <button type="button" class="btn-primary" onclick="processPastedCSV()"><i class="fa-solid fa-bolt"></i> Ingest & Recalculate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Student Profile & Action Drawer -->
+  <div class="modal-overlay" id="modal-student-profile">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-id-card"></i> Student Academic Dossier</h3>
+        <button class="close-btn" onclick="closeProfileModal()">&times;</button>
+      </div>
+      <div class="modal-body" id="profile-modal-content">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeProfileModal()">Close</button>
+        <button type="button" class="btn-primary" onclick="logInterventionAction()"><i class="fa-solid fa-handshake-angle"></i> Log Advising Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Toast Notice -->
+  <div class="toast-notice" id="toast-notice">
+    <i class="fa-solid fa-circle-check" style="color: var(--emerald);"></i>
+    <span id="toast-text">Student record added successfully!</span>
+  </div>
+
+  <!-- Production App Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
